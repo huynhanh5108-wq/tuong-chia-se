@@ -1,194 +1,51 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tường Chia Sẻ Ẩn Danh</title>
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body { background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h1 { margin: 0; color: #1a73e8; font-size: 28px; cursor: pointer; user-select: none; }
-        .header p { color: #666; margin: 5px 0 0 0; font-size: 14px; }
-        
-        .qr-section { text-align: center; margin-bottom: 20px; }
-        .qr-toggle-btn { background: #34a853; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .qr-toggle-btn:hover { background: #2d8e47; }
-        #qrBox { display: none; margin-top: 12px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        #qrImg { width: 180px; height: 180px; display: block; margin: 0 auto; }
-
-        .form-box { max-width: 500px; margin: 0 auto 30px auto; background: #fff; padding: 20px; border-radius: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        input, textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
-        input:focus, textarea:focus { border-color: #1a73e8; }
-        
-        .color-picker { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; font-size: 14px; color: #555; }
-        .color-dot { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
-        .color-dot.active { border-color: #333; transform: scale(1.15); }
-
-        button.submit-btn { width: 100%; padding: 12px; background: #1a73e8; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        button.submit-btn:hover { background: #1557b0; }
-
-        .wall { column-count: 3; column-gap: 16px; max-width: 1100px; margin: 0 auto; }
-        @media (max-width: 800px) { .wall { column-count: 2; } }
-        @media (max-width: 500px) { .wall { column-count: 1; } }
-
-        .card { break-inside: avoid; margin-bottom: 16px; padding: 18px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .card-author { font-weight: bold; color: #222; margin-bottom: 8px; font-size: 14px; }
-        .card-text { line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; font-size: 15px; color: #111; }
-        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 12px; color: #666; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 8px; }
-        
-        .action-btn { background: none; border: none; cursor: pointer; font-size: 12px; padding: 3px 6px; border-radius: 4px; }
-        .report-btn { color: #d93025; }
-        .report-btn:hover { background: rgba(217, 48, 37, 0.1); }
-        .delete-btn { background: #d93025; color: white; display: none; margin-left: 5px; }
-        body.admin-mode .delete-btn { display: inline-block; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Tường Chia Sẻ</title>
+<style>
+*{box-sizing:border-box;font-family:sans-serif}body{background:#f0f2f5;margin:0;padding:15px;color:#333}
+.hd{text-align:center;margin-bottom:15px}.hd h1{margin:0;color:#1a73e8;font-size:26px;cursor:pointer}
+.qr{text-align:center;margin-bottom:15px}.qr button{background:#34a853;color:#fff;border:0;padding:8px 15px;border-radius:20px;font-weight:700}
+#qrB{display:none;margin-top:10px;background:#fff;padding:12px;border-radius:10px}
+.box{max-width:500px;margin:0 auto 20px;background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 8px #0001}
+input,textarea{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:8px;font-size:15px}
+.cols{display:flex;gap:10px;margin-bottom:12px;align-items:center}.dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid #ccc}
+.dot.act{border-color:#000;transform:scale(1.15)}.btn{width:100%;padding:12px;background:#1a73e8;color:#fff;border:0;border-radius:8px;font-size:16px;font-weight:700}
+.wall{column-count:3;column-gap:12px;max-width:1000px;margin:0 auto}@media(max-width:768px){.wall{column-count:1}}
+.card{break-inside:avoid;margin-bottom:12px;padding:15px;border-radius:10px;box-shadow:0 2px 6px #0001}
+.ft{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:#666;border-top:1px solid #0001;padding-top:6px}
+.del{background:#d93025;color:#fff;border:0;border-radius:4px;padding:2px 6px;display:none}body.adm .del{display:inline-block}
+</style>
 </head>
 <body>
-
-    <div class="header">
-        <h1 id="pageTitle" title="Nhấn đúp để mở quản trị">Tường Chia Sẻ</h1>
-        <p>Gửi lời nhắn ẩn danh của bạn lên bảng chung</p>
-    </div>
-
-    <div class="qr-section">
-        <button class="qr-toggle-btn" onclick="toggleQR()">📱 Hiện mã QR để người khác quét</button>
-        <div id="qrBox">
-            <img id="qrImg" src="" alt="Mã QR trang web">
-            <p style="margin: 8px 0 0 0; font-size: 12px; color: #555;">Quét mã bằng camera điện thoại để vào viết bài</p>
-        </div>
-    </div>
-
-    <div class="form-box">
-        <input type="text" id="author" maxlength="40" placeholder="Biệt danh (bỏ trống sẽ hiện Ẩn danh)">
-        <textarea id="content" rows="3" maxlength="500" placeholder="Nhập thông tin bạn muốn chia sẻ..."></textarea>
-        
-        <div class="color-picker">
-            <span>Màu thẻ:</span>
-            <div class="color-dot active" style="background:#ffffff; border:1px solid #ccc;" data-color="#ffffff"></div>
-            <div class="color-dot" style="background:#fff9c4;" data-color="#fff9c4"></div>
-            <div class="color-dot" style="background:#e1f5fe;" data-color="#e1f5fe"></div>
-            <div class="color-dot" style="background:#e8f5e9;" data-color="#e8f5e9"></div>
-            <div class="color-dot" style="background:#fce4ec;" data-color="#fce4ec"></div>
-        </div>
-
-        <button class="submit-btn" id="submitBtn">Đăng lên tường</button>
-    </div>
-
-    <div class="wall" id="wall"></div>
-
-    <script>
-        function toggleQR() {
-            const box = document.getElementById("qrBox");
-            const img = document.getElementById("qrImg");
-            if (box.style.display === "none" || box.style.display === "") {
-                const currentUrl = encodeURIComponent(window.location.href);
-                img.src = `https://qrserver.com{currentUrl}`;
-                box.style.display = "inline-block";
-            } else {
-                box.style.display = "none";
-            }
-        }
-    </script>
-
-    <script type="module">
-        import { initializeApp } from "https://gstatic.com";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, increment } from "https://gstatic.com";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAr8pkj1ukLQ7NJiYjv3bx6BYg0P54qHaE",
-            authDomain: "://firebaseapp.com",
-            projectId: "tuong-chia-se",
-            storageBucket: "tuong-chia-se.firebasestorage.app",
-            messagingSenderId: "243188850790",
-            appId: "1:243188850790:web:52fbdb99bebf49562d0da7"
-        };
-
-        const ADMIN_PASS = "123456"; 
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const postsRef = collection(db, "wall_posts");
-
-        document.getElementById("pageTitle").addEventListener("dblclick", () => {
-            if (document.body.classList.contains("admin-mode")) {
-                document.body.classList.remove("admin-mode");
-                alert("Đã tắt chế độ Quản trị viên.");
-                return;
-            }
-            const pass = prompt("Nhập mật khẩu Quản trị viên để bật nút Xóa:");
-            if (pass === ADMIN_PASS) {
-                document.body.classList.add("admin-mode");
-                alert("Đã bật chế độ Quản trị! Bạn có thể bấm nút Xóa trên từng bài viết.");
-            } else if (pass !== null) {
-                alert("Sai mật khẩu!");
-            }
-        });
-
-        let selectedColor = "#ffffff";
-        document.querySelectorAll(".color-dot").forEach(dot => {
-            dot.addEventListener("click", () => {
-                document.querySelectorAll(".color-dot").forEach(d => d.classList.remove("active"));
-                dot.classList.add("active");
-                selectedColor = dot.getAttribute("data-color");
-            });
-        });
-
-        document.getElementById("submitBtn").addEventListener("click", async () => {
-            const author = document.getElementById("author").value.trim() || "Ẩn danh";
-            const content = document.getElementById("content").value.trim();
-            if (!content) return alert("Bạn chưa nhập nội dung!");
-
-            const btn = document.getElementById("submitBtn");
-            btn.disabled = true;
-            btn.innerText = "Đang đăng...";
-
-            await addDoc(postsRef, {
-                author: author,
-                content: content,
-                color: selectedColor,
-                reports: 0,
-                createdAt: serverTimestamp()
-            });
-
-            document.getElementById("content").value = "";
-            btn.disabled = false;
-            btn.innerText = "Đăng lên tường";
-        });
-
-        const q = query(postsRef, orderBy("createdAt", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const wall = document.getElementById("wall");
-            wall.innerHTML = "";
-            snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                const id = docSnap.id;
-                const reports = data.reports || 0;
-                const isHidden = reports >= 3;
-
-                const time = data.createdAt ? new Date(data.createdAt.toDate()).toLocaleString('vi-VN') : 'Vừa xong';
-                const card = document.createElement("div");
-                card.className = "card";
-                card.style.background = data.color || "#ffffff";
-                if (isHidden) {
-                    card.style.opacity = "0.5";
-                    card.style.border = "2px dashed #d93025";
-                }
-
-                card.innerHTML = `
-                    <div class="card-author">${escapeHTML(data.author)} ${reports > 0 ? `<span style="color:#d93025;font-size:11px;">(🚩 ${reports} báo cáo)</span>` : ''}</div>
-                    <div class="card-text">${isHidden && !document.body.classList.contains('admin-mode') ? '<i>[Bài viết đang tạm ẩn do nhận nhiều báo cáo]</i>' : escapeHTML(data.content)}</div>
-                    <div class="card-footer">
-                        <span>${time}</span>
-                        <div>
-                            <button class="action-btn report-btn" onclick="reportPost('${id}')">🚩 Báo cáo</button>
-                            <button class="action-btn delete-btn" onclick="deletePost('${id}')">Xóa</button>
-                        </div>
-                    </div>
-                `;
-                wall.appendChild(card);
-            });
-        });
-
-        window.reportPost = async (id) => {
-      
+<div class="hd"><h1 id="tt">Tường Chia Sẻ</h1><p style="margin:4px 0;color:#666;font-size:14px">Gửi lời nhắn ẩn danh lên bảng chung</p></div>
+<div class="qr"><button onclick="tQR()">📱 Hiện mã QR để người khác quét</button><div id="qrB"><img id="qrI" width="180" height="180"><p style="margin:5px 0 0;font-size:12px">Quét mã để vào viết bài</p></div></div>
+<div class="box">
+<input id="au" maxlength="40" placeholder="Biệt danh (bỏ trống sẽ hiện Ẩn danh)">
+<textarea id="ct" rows="3" maxlength="500" placeholder="Nhập thông tin bạn muốn chia sẻ..."></textarea>
+<div class="cols"><span>Màu:</span><div class="dot act" style="background:#fff" data-c="#fff"></div><div class="dot" style="background:#fff9c4" data-c="#fff9c4"></div><div class="dot" style="background:#e1f5fe" data-c="#e1f5fe"></div><div class="dot" style="background:#e8f5e9" data-c="#e8f5e9"></div><div class="dot" style="background:#fce4ec" data-c="#fce4ec"></div></div>
+<button class="btn" id="sb">Đăng lên tường</button>
+</div>
+<div class="wall" id="wl"></div>
+<script>
+function tQR(){const b=document.getElementById("qrB");if(b.style.display!=="inline-block"){document.getElementById("qrI").src="https://qrserver.com"+encodeURIComponent(location.href);b.style.display="inline-block"}else b.style.display="none"}
+</script>
+<script type="module">
+import{initializeApp}from"https://gstatic.com";
+import{getFirestore,collection,addDoc,onSnapshot,query,orderBy,serverTimestamp,doc,updateDoc,deleteDoc,increment}from"https://gstatic.com";
+const db=getFirestore(initializeApp({apiKey:"AIzaSyAr8pkj1ukLQ7NJiYjv3bx6BYg0P54qHaE",authDomain:"://firebaseapp.com",projectId:"tuong-chia-se",storageBucket:"tuong-chia-se.firebasestorage.app",messagingSenderId:"243188850790",appId:"1:243188850790:web:52fbdb99bebf49562d0da7"}));
+const ref=collection(db,"wall_posts");let col="#fff";
+document.getElementById("tt").ondblclick=()=>{if(document.body.classList.toggle("adm"))prompt("Mật khẩu Admin:")!=="123456"&&document.body.classList.remove("adm")};
+document.querySelectorAll(".dot").forEach(d=>d.onclick=()=>{document.querySelectorAll(".dot").forEach(x=>x.classList.remove("act"));d.classList.add("act");col=d.dataset.c});
+document.getElementById("sb").onclick=async()=>{
+const ct=document.getElementById("ct").value.trim();if(!ct)return alert("Bạn chưa nhập nội dung!");
+const btn=document.getElementById("sb");btn.disabled=true;btn.innerText="Đang đăng...";
+try{await addDoc(ref,{author:document.getElementById("au").value.trim()||"Ẩn danh",content:ct,color:col,reports:0,createdAt:serverTimestamp()});document.getElementById("ct").value=""}catch(e){alert("Lỗi: "+e.message)}
+btn.disabled=false;btn.innerText="Đăng lên tường"};
+onSnapshot(query(ref,orderBy("createdAt","desc")),s=>{const w=document.getElementById("wl");w.innerHTML="";s.forEach(d=>{const v=d.data(),r=v.reports||0,h=r>=3,c=document.createElement("div");c.className="card";c.style.background=v.color||"#fff";if(h)c.style.opacity="0.5";c.innerHTML=`<b>${v.author.replace(/</g,"&lt;")}</b> ${r>0?`<small style="color:red">(🚩${r})</small>`:""}<p style="white-space:pre-wrap;margin:8px 0">${h&&!document.body.classList.contains("adm")?"<i>[Bài viết đang tạm ẩn]</i>":v.content.replace(/</g,"&lt;")}</p><div class="ft"><span>${v.createdAt?new Date(v.createdAt.toDate()).toLocaleString("vi-VN"):"Vừa xong"}</span><div><button style="border:0;background:none;color:#d93025" onclick="rp('${d.id}')">🚩 Báo cáo</button><button class="del" onclick="dl('${d.id}')">Xóa</button></div></div>`;w.appendChild(c)})});
+window.rp=async id=>{if(confirm("Báo cáo bài này?"))await updateDoc(doc(db,"wall_posts",id),{reports:increment(1)})};
+window.dl=async id=>{if(confirm("Xóa vĩnh viễn?"))await deleteDoc(doc(db,"wall_posts",id))};
+</script>
+</body>
+</html>
