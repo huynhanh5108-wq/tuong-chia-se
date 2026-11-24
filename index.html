@@ -19,33 +19,40 @@ input,textarea{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;
 </style>
 </head>
 <body>
-<div class="hd"><h1 id="tt">Tường Chia Sẻ</h1><p style="margin:4px 0;color:#666;font-size:14px">Gửi lời nhắn ẩn danh lên bảng chung</p></div>
+<div class="hd"><h1 id="tt" onclick="adm()">Tường Chia Sẻ</h1><p style="margin:4px 0;color:#666;font-size:14px">Gửi lời nhắn ẩn danh lên bảng chung</p></div>
 <div class="qr"><button onclick="tQR()">📱 Hiện mã QR để người khác quét</button><div id="qrB"><img id="qrI" width="180" height="180"><p style="margin:5px 0 0;font-size:12px">Quét mã để vào viết bài</p></div></div>
 <div class="box">
 <input id="au" maxlength="40" placeholder="Biệt danh (bỏ trống sẽ hiện Ẩn danh)">
 <textarea id="ct" rows="3" maxlength="500" placeholder="Nhập thông tin bạn muốn chia sẻ..."></textarea>
-<div class="cols"><span>Màu:</span><div class="dot act" style="background:#fff" data-c="#fff"></div><div class="dot" style="background:#fff9c4" data-c="#fff9c4"></div><div class="dot" style="background:#e1f5fe" data-c="#e1f5fe"></div><div class="dot" style="background:#e8f5e9" data-c="#e8f5e9"></div><div class="dot" style="background:#fce4ec" data-c="#fce4ec"></div></div>
-<button class="btn" id="sb">Đăng lên tường</button>
+<div class="cols"><span>Màu:</span><div class="dot act" style="background:#fff" onclick="sc(this,'#fff')"></div><div class="dot" style="background:#fff9c4" onclick="sc(this,'#fff9c4')"></div><div class="dot" style="background:#e1f5fe" onclick="sc(this,'#e1f5fe')"></div><div class="dot" style="background:#e8f5e9" onclick="sc(this,'#e8f5e9')"></div><div class="dot" style="background:#fce4ec" onclick="sc(this,'#fce4ec')"></div></div>
+<button class="btn" id="sb" onclick="post()">Đăng lên tường</button>
 </div>
 <div class="wall" id="wl"></div>
 <script>
-function tQR(){const b=document.getElementById("qrB");if(b.style.display!=="inline-block"){document.getElementById("qrI").src="https://qrserver.com"+encodeURIComponent(location.href);b.style.display="inline-block"}else b.style.display="none"}
-</script>
-<script type="module">
-import{initializeApp}from"https://gstatic.com";
-import{getFirestore,collection,addDoc,onSnapshot,query,orderBy,serverTimestamp,doc,updateDoc,deleteDoc,increment}from"https://gstatic.com";
-const db=getFirestore(initializeApp({apiKey:"AIzaSyAr8pkj1ukLQ7NJiYjv3bx6BYg0P54qHaE",authDomain:"://firebaseapp.com",projectId:"tuong-chia-se",storageBucket:"tuong-chia-se.firebasestorage.app",messagingSenderId:"243188850790",appId:"1:243188850790:web:52fbdb99bebf49562d0da7"}));
-const ref=collection(db,"wall_posts");let col="#fff";
-document.getElementById("tt").ondblclick=()=>{if(document.body.classList.toggle("adm"))prompt("Mật khẩu Admin:")!=="123456"&&document.body.classList.remove("adm")};
-document.querySelectorAll(".dot").forEach(d=>d.onclick=()=>{document.querySelectorAll(".dot").forEach(x=>x.classList.remove("act"));d.classList.add("act");col=d.dataset.c});
-document.getElementById("sb").onclick=async()=>{
+const API=["https:/","firestore.googleapis.com","v1","projects","tuong-chia-se","databases","(default)","documents","wall_posts"].join("/");
+let col="#fff",clicks=0;
+function tQR(){const b=document.getElementById("qrB");if(b.style.display!=="inline-block"){document.getElementById("qrI").src="https://quickchart.io"+encodeURIComponent(location.href);b.style.display="inline-block"}else b.style.display="none"}
+function sc(el,c){document.querySelectorAll(".dot").forEach(x=>x.classList.remove("act"));el.classList.add("act");col=c}
+function adm(){clicks++;setTimeout(()=>clicks=0,600);if(clicks>=2){clicks=0;if(document.body.classList.toggle("adm"))if(prompt("Mật khẩu Admin:")!=="123456")document.body.classList.remove("adm")}}
+async function post(){
 const ct=document.getElementById("ct").value.trim();if(!ct)return alert("Bạn chưa nhập nội dung!");
 const btn=document.getElementById("sb");btn.disabled=true;btn.innerText="Đang đăng...";
-try{await addDoc(ref,{author:document.getElementById("au").value.trim()||"Ẩn danh",content:ct,color:col,reports:0,createdAt:serverTimestamp()});document.getElementById("ct").value=""}catch(e){alert("Lỗi: "+e.message)}
-btn.disabled=false;btn.innerText="Đăng lên tường"};
-onSnapshot(query(ref,orderBy("createdAt","desc")),s=>{const w=document.getElementById("wl");w.innerHTML="";s.forEach(d=>{const v=d.data(),r=v.reports||0,h=r>=3,c=document.createElement("div");c.className="card";c.style.background=v.color||"#fff";if(h)c.style.opacity="0.5";c.innerHTML=`<b>${v.author.replace(/</g,"&lt;")}</b> ${r>0?`<small style="color:red">(🚩${r})</small>`:""}<p style="white-space:pre-wrap;margin:8px 0">${h&&!document.body.classList.contains("adm")?"<i>[Bài viết đang tạm ẩn]</i>":v.content.replace(/</g,"&lt;")}</p><div class="ft"><span>${v.createdAt?new Date(v.createdAt.toDate()).toLocaleString("vi-VN"):"Vừa xong"}</span><div><button style="border:0;background:none;color:#d93025" onclick="rp('${d.id}')">🚩 Báo cáo</button><button class="del" onclick="dl('${d.id}')">Xóa</button></div></div>`;w.appendChild(c)})});
-window.rp=async id=>{if(confirm("Báo cáo bài này?"))await updateDoc(doc(db,"wall_posts",id),{reports:increment(1)})};
-window.dl=async id=>{if(confirm("Xóa vĩnh viễn?"))await deleteDoc(doc(db,"wall_posts",id))};
+try{
+const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{author:{stringValue:document.getElementById("au").value.trim()||"Ẩn danh"},content:{stringValue:ct},color:{stringValue:col},reports:{integerValue:"0"},ts:{integerValue:String(Date.now())}}})});
+if(!r.ok)throw new Error("Mã lỗi "+r.status);
+document.getElementById("ct").value="";await load();
+}catch(e){alert("Không đăng được: "+e.message)}
+btn.disabled=false;btn.innerText="Đăng lên tường"}
+async function load(){
+try{
+const r=await fetch(API+"?pageSize=100");const d=await r.json();const w=document.getElementById("wl");
+if(!d.documents){w.innerHTML="";return}
+const items=d.documents.map(x=>{const f=x.fields||{};return{id:x.name.split("/").pop(),au:f.author?.stringValue||"Ẩn danh",ct:f.content?.stringValue||"",c:f.color?.stringValue||"#fff",rp:Number(f.reports?.integerValue||0),ts:Number(f.ts?.integerValue||0)}}).sort((a,b)=>b.ts-a.ts);
+w.innerHTML=items.map(v=>{const h=v.rp>=3;return`<div class="card" style="background:${v.c};${h?"opacity:0.5":""}"><b>${v.au.replace(/</g,"&lt;")}</b> ${v.rp>0?`<small style="color:red">(🚩${v.rp})</small>`:""}<p style="white-space:pre-wrap;margin:8px 0">${h&&!document.body.classList.contains("adm")?"<i>[Bài viết đang tạm ẩn]</i>":v.ct.replace(/</g,"&lt;")}</p><div class="ft"><span>${v.ts?new Date(v.ts).toLocaleString("vi-VN"):"Vừa xong"}</span><div><button style="border:0;background:none;color:#d93025" onclick="rep('${v.id}',${v.rp})">🚩 Báo cáo</button><button class="del" onclick="del('${v.id}')">Xóa</button></div></div></div>`}).join("");
+}catch(e){}}
+async function rep(id,cur){if(confirm("Báo cáo bài này?")){await fetch(API+"/"+id+"?updateMask.fieldPaths=reports",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({fields:{reports:{integerValue:String(cur+1)}}})});load()}}
+async function del(id){if(confirm("Xóa vĩnh viễn?")){await fetch(API+"/"+id,{method:"DELETE"});load()}}
+load();setInterval(load,4000);
 </script>
 </body>
 </html>
